@@ -1,3 +1,4 @@
+原项目地址：https://github.com/DyAxy/Crisp-Telegram-Bot
 - [Crisp Telegram Bot via Python](#crisp-telegram-bot-via-python)
   - [现有功能](#现有功能)
   - [计划功能](#计划功能)
@@ -17,8 +18,6 @@
 
 # Crisp Telegram Bot via Python
 
-一个简单的项目，让 Crisp 客服系统支持透过 Telegram Bot 来快速回复
-快速反馈群：[https://t.me/v2board_python_bot](https://t.me/v2board_python_bot)
 
 Python 版本需求 >= 3.8
 
