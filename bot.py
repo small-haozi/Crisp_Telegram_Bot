@@ -48,35 +48,46 @@ except Exception as error:
 
 try:
     token = config['bot']['token']
-    #proxy = 'http://127.0.0.1:7890'
     app = Application.builder().token(token).build()
-    #app = Application.builder().token(token).proxy_url(proxy).get_updates_proxy_url(proxy).build()
 except Exception as error:
     print('无法启动 Telegram Bot，请确认 Bot Token 是否正确，或者是否能连接 Telegram 服务器')
     sys.exit(0)
 
-
 async def onReply(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     msg = update.effective_message
-    website_id = config['crisp']['website']
-    if msg.reply_to_message.text is not None:
-        session_id = re.search(
-            'session_\w{8}(-\w{4}){3}-\w{12}', msg.reply_to_message.text).group()
-    elif msg.reply_to_message.caption is not None:
-        session_id = re.search(
-            'session_\w{8}(-\w{4}){3}-\w{12}', msg.reply_to_message.caption).group()
-    query = {
-        "type": "text",
-        "content": msg.text,
-        "from": "operator",
-        "origin": "chat"
-    }
-    client.website.send_message_in_conversation(website_id, session_id, query)
+    text = msg.text or msg.caption  # 处理文本或图片标题
 
+    # 检查消息中是否包含关键词
+    if re.search(r'在吗|你好', text):
+        reply_text = config['autoreply']['在吗|你好']
+        await update.message.reply_text(reply_text)
+        return  # 发送自动回复后返回，不继续处理
+
+    # 如果消息是回复，尝试发送到Crisp
+    if msg.reply_to_message:
+        website_id = config['crisp']['website']
+        session_id = None
+        if msg.reply_to_message.text:
+            match = re.search('session_\w{8}(-\w{4}){3}-\w{12}', msg.reply_to_message.text)
+            if match:
+                session_id = match.group()
+        elif msg.reply_to_message.caption:
+            match = re.search('session_\w{8}(-\w{4}){3}-\w{12}', msg.reply_to_message.caption)
+            if match:
+                session_id = match.group()
+
+        if session_id:
+            query = {
+                "type": "text",
+                "content": text,
+                "from": "operator",
+                "origin": "chat"
+            }
+            client.website.send_message_in_conversation(website_id, session_id, query)
 
 def main():
     try:
-        app.add_handler(MessageHandler(filters.REPLY & filters.TEXT, onReply))
+        app.add_handler(MessageHandler(filters.TEXT, onReply))
         # 导入任务文件夹
         import Modules
         for i in Modules.content:
@@ -87,13 +98,12 @@ def main():
                     app.job_queue.run_repeating(
                         mods.exec, interval=Conf.interval, name=i)
                 if Conf.method == 'events':
-                    app.job_queue.run_once(mods.exec,5,name=i)
+                    app.job_queue.run_once(mods.exec, 5, name=i)
         # 启动 Bot
         app.run_polling(drop_pending_updates=True)
     except Exception as error:
         print(error)
         sys.exit(0)
-
 
 if __name__ == "__main__":
     main()
