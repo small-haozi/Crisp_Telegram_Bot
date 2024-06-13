@@ -1,4 +1,8 @@
 原项目地址：https://github.com/DyAxy/Crisp-Telegram-Bot
+基于原项目魔改了一些小功能
+去除openai模块
+并使自动回复的关键词可以实现-包含关键词就触发回复（而不是原版的关键词精准匹配-以至于错一个字都不会触发自动回复），并且自动回复的内容也会推送至telegram
+
 - [Crisp Telegram Bot via Python](#crisp-telegram-bot-via-python)
   - [现有功能](#现有功能)
   - [计划功能](#计划功能)
